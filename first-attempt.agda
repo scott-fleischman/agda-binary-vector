@@ -57,8 +57,8 @@ fromTo {k = suc k} (l *ᴮ r)
   = refl
 
 to-injective : ∀ {A k} {x y : B A k} → to x ≡ to y → x ≡ y
-to-injective {A} {zero} {base a} {base .a} refl = refl
-to-injective {A} {suc k} {x *ᴮ x₁} {y *ᴮ y₁} p rewrite +-identityʳ (2 ^ k) = {!!}
+to-injective {A}{k}{x}{y} p with Relation.Binary.PropositionalEquality.cong (from {k = k}) p
+... | r rewrite fromTo x | fromTo y = r
 
 bij : {A : Set} {k : ℕ} → Bijection (Relation.Binary.PropositionalEquality.setoid (B A k)) (Relation.Binary.PropositionalEquality.setoid (Vec A (2 ^ k)))
 bij .Bijection.to ._⟨$⟩_ = to
