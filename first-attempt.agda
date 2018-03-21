@@ -5,9 +5,6 @@ open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Product
 open import Data.Vec
-open import Function.Bijection
-open import Function.Equality
-open import Function.Surjection
 open import Relation.Binary.PropositionalEquality
 
 data B (A : Set) : ℕ → Set where
@@ -56,14 +53,20 @@ fromTo {k = suc k} (l *ᴮ r)
   | fromTo r
   = refl
 
-to-injective : ∀ {A k} {x y : B A k} → to x ≡ to y → x ≡ y
-to-injective {A}{k}{x}{y} p with Relation.Binary.PropositionalEquality.cong (from {k = k}) p
-... | r rewrite fromTo x | fromTo y = r
+module Bijection where
+  open import Function.Bijection
+  open import Function.Equality
+  open import Function.Surjection
+  open import Relation.Binary.PropositionalEquality as Prop
 
-bij : {A : Set} {k : ℕ} → Bijection (Relation.Binary.PropositionalEquality.setoid (B A k)) (Relation.Binary.PropositionalEquality.setoid (Vec A (2 ^ k)))
-bij .Bijection.to ._⟨$⟩_ = to
-bij .Bijection.to .Π.cong = Relation.Binary.PropositionalEquality.cong to
-bij .Bijection.bijective .Bijective.injective = to-injective
-bij .Bijection.bijective .Bijective.surjective .Surjective.from ._⟨$⟩_ = from
-bij .Bijection.bijective .Bijective.surjective .Surjective.from .Π.cong = Relation.Binary.PropositionalEquality.cong from 
-bij {k = k} .Bijection.bijective .Bijective.surjective .Function.Surjection.Surjective.right-inverse-of = toFrom {k = k}
+  to-injective : ∀ {A k} {x y : B A k} → to x ≡ to y → x ≡ y
+  to-injective {A}{k}{x}{y} p with Prop.cong (from {k = k}) p
+  ... | r rewrite fromTo x | fromTo y = r
+
+  bij : {A : Set} {k : ℕ} → Bijection (Prop.setoid (B A k)) (Prop.setoid (Vec A (2 ^ k)))
+  bij .Bijection.to ._⟨$⟩_ = to
+  bij .Bijection.to .Π.cong = Prop.cong to
+  bij .Bijection.bijective .Bijective.injective = to-injective
+  bij .Bijection.bijective .Bijective.surjective .Surjective.from ._⟨$⟩_ = from
+  bij .Bijection.bijective .Bijective.surjective .Surjective.from .Π.cong = Prop.cong from 
+  bij {k = k} .Bijection.bijective .Bijective.surjective .Function.Surjection.Surjective.right-inverse-of = toFrom {k = k}
