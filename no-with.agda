@@ -24,39 +24,35 @@ to-rewrite-identity+0 k l r .(2 ^ k) refl = to l ++ to r
 to (base a) = a ∷ []
 to {k = suc k} (l *ᴮ r) = to-rewrite-identity+0 k l r (2 ^ k + 0) (+-identityʳ (2 ^ k))
 
-splitAt-recurse : {A : Set} {n : ℕ} (m : ℕ) (x : A) (xs : Vec A (m + n))
-  (r : ∃₂ λ (ys : Vec A m) (zs : Vec A n) → xs ≡ ys ++ zs)
-  → ∃₂ λ (ys : Vec A (suc m)) (zs : Vec A n) → x ∷ xs ≡ ys ++ zs
-splitAt-recurse m x .(ys ++ zs) (ys , zs , refl) = x ∷ ys , zs , refl
+split-left : {A : Set} (m : ℕ) {n : ℕ} (xs : Vec A (m + n)) → Vec A m
+split-left zero xs = []
+split-left (suc m) (x ∷ xs) = x ∷ split-left m xs
 
-splitAt : {A : Set} (m : ℕ) {n : ℕ} (xs : Vec A (m + n))
-  → ∃₂ λ (ys : Vec A m) (zs : Vec A n) → xs ≡ ys ++ zs
-splitAt zero    xs        = ([] , xs , refl)
-splitAt (suc m) (x ∷ xs) = splitAt-recurse m x xs (splitAt m xs)
+split-right : {A : Set} (m : ℕ) {n : ℕ} (xs : Vec A (m + n)) → Vec A n
+split-right zero xs = xs
+split-right (suc m) (_ ∷ xs) = split-right m xs
+
+split-right≡ : {A : Set} {k : ℕ} (w : ℕ) (p : w ≡ (2 ^ k)) (v : Vec A ((2 ^ k) + w))
+  → Vec A (2 ^ k)
+split-right≡ {k = k} .(2 ^ k) refl v = split-right (2 ^ k) v
 
 from : {A : Set} {k : ℕ} -> Vec A (2 ^ k) -> B A k
-
-from-split : ∀ {A} k (v : Vec A ((2 ^ k) + (2 ^ k))) → Σ (Vec A (2 ^ k)) (λ a → Σ (Vec A (2 ^ k)) (λ zs → v ≡ a ++ zs)) → B A (suc k)
-from-split k v (vl , vr , p) = from vl *ᴮ from vr
-
-from-rewrite-identity+0 : ∀ {A} k w → w ≡ (2 ^ k) → Vec A ((2 ^ k) + w) → B A (suc k)
-from-rewrite-identity+0 k .(2 ^ k) refl v = from-split k v (splitAt (2 ^ k) v)
-
 from {k = zero} (a ∷ []) = base a
-from {k = suc k} v = from-rewrite-identity+0 k (2 ^ k + 0) (+-identityʳ (2 ^ k)) v
+from {k = suc k} v
+  = from (split-left (2 ^ k) v)
+  *ᴮ from (split-right≡ {k = k} (2 ^ k + 0) (+-identityʳ (2 ^ k)) v)
 
 
 toFrom : {A : Set} {k : ℕ} -> (v : Vec A (2 ^ k)) -> to {k = k} (from v) ≡ v
 toFrom {k = zero} (a ∷ []) = refl
 toFrom {k = suc k} v = {!!}
 
-split++left : {A : Set} {j k : ℕ} (l : Vec A j) (r : Vec A k) → proj₁ (splitAt j (l ++ r)) ≡ l
-split++left [] r = refl
-split++left {j = suc j} (x ∷ l) r = {!!}
-
-split++right : {A : Set} {j k : ℕ} (l : Vec A j) (r : Vec A k) → proj₁ (proj₂ (splitAt j (l ++ r))) ≡ r
-split++right [] r = refl
-split++right {j = suc j} (x ∷ l) r = {!!}
+fromTo-left : ∀ {A} k (l r : B A k)
+  → (from
+       (split-left (2 ^ k)
+        (to-rewrite-identity+0 k l r ((2 ^ k) + 0) (+-identityʳ (2 ^ k))))) ≡ l
+fromTo-left zero (base a) r = refl
+fromTo-left (suc k) (ll *ᴮ lr) r = {!!}
 
 fromTo : {A : Set} {k : ℕ} -> (b : B A k) -> from (to b) ≡ b
 fromTo (base a) = refl
