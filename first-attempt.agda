@@ -17,25 +17,18 @@ to {k = suc k} (l *ᴮ r) rewrite +-identityʳ (2 ^ k) = to l ++ to r
 
 from : {A : Set} {k : ℕ} -> Vec A (2 ^ k) -> B A k
 from {k = zero} (a ∷ []) = base a
-from {k = suc k} v rewrite +-identityʳ (2 ^ k) with splitAt (2 ^ k) v
-... | vl , vr , p = from vl *ᴮ from vr
+from {A} {suc k} v with splitAt (2 ^ k) v
+... | vl , vr , p = from vl *ᴮ from (subst (Vec A) (+-identityʳ (2 ^ k)) vr)
 
 toFrom : {A : Set} {k : ℕ} -> (v : Vec A (2 ^ k)) -> to {k = k} (from v) ≡ v
 toFrom {k = zero} (a ∷ []) = refl
-toFrom {k = suc k} v = {!!}
---toFrom {k = suc k} v rewrite +-identityʳ (2 ^ k) = {!!}
-{-
-(2 ^ k) + 0 * (2 ^ k) != w of type ℕ
-when checking that the type
-(k w : ℕ) (w₁ : w ≡ (2 ^ k)) {A : Set} (v : Vec A ((2 ^ k) + w)) →
-to (from v | w | w₁) ≡ v
-of the generated with function is well-formed
--}
+toFrom {k = suc k} v with splitAt (2 ^ k) v
+... | vl , vr , p rewrite +-identityʳ (2 ^ k) | toFrom {k = k} vl | toFrom {k = k} vr = sym p 
 
 split++left : {A : Set} {j k : ℕ} (l : Vec A j) (r : Vec A k) → proj₁ (splitAt j (l ++ r)) ≡ l
 split++left [] r = refl
-split++left {j = suc j} (x ∷ l) r with splitAt j (l ++ r) | inspect (splitAt j) (l ++ r)
-split++left {_} {suc j} (x ∷ l) r | l' , r' , q | Reveal_·_is_.[ eq ] = {!!}
+split++left {j = suc j} (x ∷ l) r with splitAt j (l ++ r) 
+split++left {_} {suc j} (x ∷ l) r | l' , r' , q = {!!}
 
 split++right : {A : Set} {j k : ℕ} (l : Vec A j) (r : Vec A k) → proj₁ (proj₂ (splitAt j (l ++ r))) ≡ r
 split++right [] r = refl
