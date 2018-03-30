@@ -41,13 +41,16 @@ from {A} {suc k} v = from (take (2 ^ k) v) *ᴮ from (subst (Vec A) (+-identity�
 
 toFrom : {A : Set} {k : ℕ} -> (v : Vec A (2 ^ k)) -> to {k = k} (from v) ≡ v
 toFrom {k = zero} (a ∷ []) = refl
-toFrom {k = suc k} v rewrite +-identityʳ (2 ^ k) | toFrom {k = k} (take (2 ^ k) v) | toFrom {k = k} (drop (2 ^ k) v) = take++drop-id (2 ^ k) v 
+toFrom {k = suc k} v
+  rewrite +-identityʳ (2 ^ k)
+  | toFrom {k = k} (take (2 ^ k) v)
+  | toFrom {k = k} (drop (2 ^ k) v)
+  = take++drop-id (2 ^ k) v
 
 fromTo : {A : Set} {k : ℕ} -> (b : B A k) -> from (to b) ≡ b
 fromTo (base a) = refl
 fromTo {k = suc k} (l *ᴮ r)
-  rewrite
-    +-identityʳ (2 ^ k)
+  rewrite +-identityʳ (2 ^ k)
   | take++ (to l) (to r)
   | fromTo l
   | drop++ (to l) (to r)
